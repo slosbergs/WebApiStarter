@@ -1,24 +1,22 @@
 using CorrelationId;
 using CorrelationId.DependencyInjection;
 using CorrelationId.HttpClient;
-using Elastic.CommonSchema;
 using Elastic.CommonSchema.Serilog;
 using LoggingWithCorrelationIdDemo.Infrastructure;
 using LoggingWithCorrelationIdDemo.Infrastructure.Polly;
 using LoggingWithCorrelationIdDemo.Swagger;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
-using Polly;
-using Polly.Extensions.Http;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
-using Serilog.Sinks.SystemConsole.Themes;
-using System.Reflection;
 
 
-Serilog.Log.Logger = new LoggerConfiguration()
+var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
+    .Enrich.WithProperty("system.environment", builder.Environment.EnvironmentName)
+    .Enrich.WithProperty("system.service", builder.Environment.ApplicationName)
     .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
@@ -27,15 +25,14 @@ Serilog.Log.Logger = new LoggerConfiguration()
     .Filter.ByExcluding(logEvent =>
     {
         var requestPath = logEvent.Properties.GetValueOrDefault("RequestPath")?.ToString();
-        return requestPath.Contains("/health/", StringComparison.OrdinalIgnoreCase); 
+        return requestPath!.Contains("/health/", StringComparison.OrdinalIgnoreCase);
     })
 
-    //.WriteTo.Async(wt => wt.Console(new EcsTextFormatter(new() { IncludeHost = false, IncludeUser = false })))
+    .WriteTo.Async(wt => wt.Console(new EcsTextFormatter(new() { IncludeHost = false, IncludeUser = false, IncludeProcess = false })))
     //.WriteTo.Async(wt => wt.Console(new RenderedCompactJsonFormatter()))
-    .WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Literate))
+    //.WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Literate))
     .CreateLogger();
 
-var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDefaultCorrelationId(options =>
@@ -44,10 +41,8 @@ builder.Services.AddDefaultCorrelationId(options =>
     options.AddToLoggingScope = true;
     options.LoggingScopeKey = CorrelationIdAttribute.Name;
     options.EnforceHeader = false;
-    options.IgnoreRequestHeader = false;
     options.IncludeInResponse = true;
     options.RequestHeader = CorrelationIdAttribute.Name;
-    options.UpdateTraceIdentifier = true;
 });
 
 builder.Services.AddControllers();
