@@ -9,8 +9,8 @@ FROM build as test
 RUN dotnet test WebApiStarterTests -c Release --no-build --logger html --collect:"XPlat Code Coverage"
 RUN dotnet tool install dotnet-reportgenerator-globaltool
 RUN reportgenerator \
-	-reports:"WebApiStarterTests/TestResults/**/coverage.cobertura.xml"
-	-targetdir:"WebApiStarterTests/TestResults/CoverageReport"
+	-reports:"WebApiStarterTests/TestResults/**/coverage.cobertura.xml" \
+	-targetdir:"WebApiStarterTests/TestResults/CoverageReport" \
 	-reporttypes:Html
 
 FROM scratch as export-test-results
