@@ -7,7 +7,7 @@ RUN dotnet build WebApiStarter -c Release --no-restore
 
 FROM build as test
 RUN dotnet test WebApiStarterTests -c Release --logger html --collect:"XPlat Code Coverage"
-RUN dotnet tool install dotnet-reportgenerator-globaltool
+RUN dotnet tool install -g dotnet-reportgenerator-globaltool
 RUN reportgenerator \
 	-reports:"WebApiStarterTests/TestResults/**/coverage.cobertura.xml" \
 	-targetdir:"WebApiStarterTests/TestResults/CoverageReport" \
