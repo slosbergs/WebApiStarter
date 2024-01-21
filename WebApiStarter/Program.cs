@@ -51,7 +51,7 @@ builder.Host.UseSerilog();
 
 
 // register typed clients with correlation id forwarding and retry policies
-builder.Services.AddHttpClient<TodoSystemApiClient>(
+builder.Services.AddHttpClient<ITodoSystemApiClient, TodoSystemApiClient>(
     client =>
     {
         client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
@@ -60,7 +60,7 @@ builder.Services.AddHttpClient<TodoSystemApiClient>(
     .AddCorrelationIdForwarding()
     .AddPolicyHandler(PollyPolicies.GetDefaultRetryPolicy());
 
-builder.Services.AddHttpClient<FailingHttpClient>()
+builder.Services.AddHttpClient<IFailingHttpClient, FailingHttpClient>()
     .AddCorrelationIdForwarding()
     .AddPolicyHandler(PollyPolicies.GetDefaultRetryPolicy());
 
