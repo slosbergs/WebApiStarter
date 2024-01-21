@@ -9,7 +9,7 @@ FROM build as test
 RUN dotnet test WebApiStarterTests -c Release --logger html --collect:"XPlat Code Coverage"
 RUN dotnet tool install -g dotnet-reportgenerator-globaltool
 RUN COVERAGEFILE=$(find WebApiStarterTests/TestResults -name "coverage.cobertura.xml" -type f) && echo "$COVERAGEFILE"
-RUN dotnet reportgenerator \
+RUN /root/.dotnet/tools/reportgenerator \
 	-reports:"$COVERAGEFILE" \
 	-targetdir:WebApiStarterTests/TestResults/CoverageReport \
 	-reporttypes:Html
