@@ -65,8 +65,14 @@ jobs:
           cache-to: type=gha,mode=max
           outputs: type=local,dest=TestResults
 
-      - run: |
-          ls TestResults
+      # upload TestResults folder as an artifact
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.2.0
+        with:
+          name: Test Results
+          path: /TestResults/**
+          overwrite: true
+          retention-days: 15
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
