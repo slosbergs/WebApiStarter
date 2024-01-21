@@ -61,9 +61,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - run: |
-          ls
-
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
@@ -71,7 +68,7 @@ jobs:
         uses: docker/build-push-action@v5 # v5.0.0
         with:
           context: .
-          file: WebApiStarter\docker\Dockerfile
+          file: WebApiStarter/docker/Dockerfile
           push: false #${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -85,7 +82,7 @@ jobs:
         uses: docker/build-push-action@v5 # v5.0.0
         with:
           context: .
-          file: WebApiStarter\docker\Dockerfile
+          file: WebApiStarter/docker/Dockerfile
           target: export-test-results
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
