@@ -1,8 +1,8 @@
 using Elastic.CommonSchema;
-using LoggingWithCorrelationIdDemo.Infrastructure;
+using WebApiStarter.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LoggingWithCorrelationIdDemo.Controllers;
+namespace WebApiStarter.Controllers;
 
 [ApiController]
 [Route("[controller]")]

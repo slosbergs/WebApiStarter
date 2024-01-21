@@ -1,8 +1,8 @@
-using LoggingWithCorrelationIdDemo.Infrastructure;
-using LoggingWithCorrelationIdDemo.Model;
+using WebApiStarter.Infrastructure;
+using WebApiStarter.Model;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LoggingWithCorrelationIdDemo.Controllers
+namespace WebApiStarter.Controllers
 {
     [ApiController]
     [Route("[controller]")]

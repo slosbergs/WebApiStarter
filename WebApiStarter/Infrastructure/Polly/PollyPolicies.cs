@@ -1,7 +1,7 @@
 ﻿using Polly;
 using Polly.Extensions.Http;
 
-namespace LoggingWithCorrelationIdDemo.Infrastructure.Polly
+namespace WebApiStarter.Infrastructure.Polly
 {
     public static class PollyPolicies
     {

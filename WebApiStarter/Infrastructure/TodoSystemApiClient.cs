@@ -1,8 +1,8 @@
-﻿using LoggingWithCorrelationIdDemo.Model;
+﻿using WebApiStarter.Model;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace LoggingWithCorrelationIdDemo.Infrastructure;
+namespace WebApiStarter.Infrastructure;
 
 /// <summary>
 /// https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient-guidelines

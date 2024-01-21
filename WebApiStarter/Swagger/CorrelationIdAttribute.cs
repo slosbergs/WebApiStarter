@@ -1,7 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace LoggingWithCorrelationIdDemo.Swagger;
+namespace WebApiStarter.Swagger;
 
 public class CorrelationIdAttribute : IOperationFilter
 {

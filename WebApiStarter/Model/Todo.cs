@@ -1,4 +1,4 @@
-﻿namespace LoggingWithCorrelationIdDemo.Model;
+﻿namespace WebApiStarter.Model;
 
 public class Todo
 {
