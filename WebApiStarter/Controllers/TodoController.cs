@@ -9,9 +9,9 @@ namespace WebApiStarter.Controllers
     public class TodoController : ControllerBase
     {
         private readonly ILogger<TodoController> _logger;
-        private readonly TodoSystemApiClient _todoClient;
+        private readonly ITodoSystemApiClient _todoClient;
 
-        public TodoController(ILogger<TodoController> logger, TodoSystemApiClient todoClient)
+        public TodoController(ILogger<TodoController> logger, ITodoSystemApiClient todoClient)
         {
             _logger = logger;
             _todoClient = todoClient;
