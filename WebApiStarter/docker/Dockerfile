@@ -15,7 +15,7 @@ RUN COVERAGEFILE=$(find WebApiStarterTests/TestResults -name "coverage.cobertura
 			-reporttypes:Html
 
 FROM scratch as export-test-results
-COPY --from=test /source/TestResults/CoverageReport .
+COPY --from=test /source/WebApiStarterTests/TestResults/CoverageReport ./CoverageReport
 COPY --from=test /source/TestResults/*.html .
 
 FROM build AS publish
