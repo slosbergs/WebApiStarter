@@ -1,8 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-jammy AS build
 WORKDIR /source
-COPY WebApiStarter/WebApiStarter.csproj ./
+COPY WebApiStarter/WebApiStarter.csproj WebApiStarter/WebApiStarter.csproj 
 RUN dotnet restore WebApiStarter/WebApiStarter.csproj
-COPY WebApiStarter ./
+COPY . .
 RUN dotnet build WebApiStarter -c Release --no-restore
 
 FROM build as test
