@@ -8,11 +8,11 @@ RUN dotnet build WebApiStarter -c Release --no-restore
 FROM build as test
 RUN dotnet test WebApiStarterTests -c Release --logger html --collect:"XPlat Code Coverage"; exit 0
 RUN dotnet tool install -g dotnet-reportgenerator-globaltool
-RUN COVERAGEFILE=$(find WebApiStarterTests/TestResults -name "coverage.cobertura.xml" -type f) && echo "$COVERAGEFILE"
-RUN /root/.dotnet/tools/reportgenerator \
-	-reports:$COVERAGEFILE \
-	-targetdir:WebApiStarterTests/TestResults/CoverageReport \
-	-reporttypes:Html
+RUN COVERAGEFILE=$(find WebApiStarterTests/TestResults -name "coverage.cobertura.xml" -type f) && \
+		/root/.dotnet/tools/reportgenerator \
+			-reports:"$COVERAGEFILE" \
+			-targetdir:WebApiStarterTests/TestResults/CoverageReport \
+			-reporttypes:Html
 
 FROM scratch as export-test-results
 COPY --from=test /source/TestResults/CoverageReport .
