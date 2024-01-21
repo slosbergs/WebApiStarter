@@ -68,6 +68,7 @@ jobs:
         uses: docker/build-push-action@v5 # v5.0.0
         with:
           context: .
+          file: WebApiStarter\docker\Dockerfile
           push: false #${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -79,6 +80,7 @@ jobs:
         uses: docker/build-push-action@v5 # v5.0.0
         with:
           context: .
+          file: WebApiStarter\docker\Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
