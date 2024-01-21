@@ -6,7 +6,7 @@ COPY . .
 RUN dotnet build WebApiStarter -c Release --no-restore
 
 FROM build as test
-RUN dotnet test WebApiStarterTests -c Release --no-build --logger html --collect:"XPlat Code Coverage"
+RUN dotnet test WebApiStarterTests -c Release --logger html --collect:"XPlat Code Coverage"
 RUN dotnet tool install dotnet-reportgenerator-globaltool
 RUN reportgenerator \
 	-reports:"WebApiStarterTests/TestResults/**/coverage.cobertura.xml" \
@@ -20,7 +20,7 @@ COPY --from=test /source/TestResults/*.html .
 FROM build AS publish
 RUN dotnet publish WebApiStarter -c Release --no-build -o /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy
 WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "WebApiStarter.dll"]
