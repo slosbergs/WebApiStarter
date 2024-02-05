@@ -7,5 +7,19 @@ Accept: application/json
 
 GET {{LoggingWithCorrelationIdDemo_HostAddress}}/todo/1/
 Accept: application/json
-A-COrrelation-Id: zebra
+X-Correlation-Id: zebra
+###
+
+
+
+
+POST {{LoggingWithCorrelationIdDemo_HostAddress}}/todo/1/
+Content-Type: application/json
+X-Correlation-Id: zebra
+
+{
+  "userId": 1,
+  "title": "asddasda",
+  "completed": false
+}
 ###

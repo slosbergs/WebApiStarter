@@ -1,6 +1,6 @@
 using WebApiStarter.Infrastructure;
-using WebApiStarter.Model;
 using Microsoft.AspNetCore.Mvc;
+using WebApiStarter.Domain.Model;
 
 namespace WebApiStarter.Controllers
 {
@@ -21,6 +21,13 @@ namespace WebApiStarter.Controllers
         public async Task<IEnumerable<Todo>> GetAsync(int userId)
         {
             return await _todoClient.GetUserTodosAsync(userId);
+        }
+
+        [HttpPost("{userId}", Name = "CreateTodo")]
+        public async Task<int> PostAsync(int userId, [FromBody] Todo item)
+        {
+            var newId = await _todoClient.CreateAsync(userId, item);
+            return newId;
         }
 
     }

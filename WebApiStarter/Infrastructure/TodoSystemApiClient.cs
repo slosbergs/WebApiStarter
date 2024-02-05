@@ -1,13 +1,17 @@
-﻿using WebApiStarter.Model;
+﻿using KafkaFlow.Producers;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using WebApiStarter.Domain.Events;
+using WebApiStarter.Domain.Model;
+using WebApiStarter.Services;
 
 namespace WebApiStarter.Infrastructure;
 
 public interface ITodoSystemApiClient
 {
-    void Dispose();
+    Task<int> CreateAsync(int userId, Todo item);
     Task<Todo[]> GetUserTodosAsync(int userId);
+    void Dispose();
 }
 
 /// <summary>
@@ -15,7 +19,7 @@ public interface ITodoSystemApiClient
 /// </summary>
 public sealed class TodoSystemApiClient(
     HttpClient httpClient,
-    ILogger<TodoSystemApiClient> logger) : IDisposable, ITodoSystemApiClient
+    ILogger<TodoSystemApiClient> logger, EventProducer eventProducer) : IDisposable, ITodoSystemApiClient
 {
     public async Task<Todo[]> GetUserTodosAsync(int userId)
     {
@@ -35,6 +39,28 @@ public sealed class TodoSystemApiClient(
         }
 
         return [];
+    }
+
+    public async Task<int> CreateAsync(int userId, Todo item)
+    {
+        try
+        {
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync<Todo>(
+                    $"todos", item, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+            response.EnsureSuccessStatusCode();
+            var insertedItem = await response.Content.ReadFromJsonAsync<Todo>();
+
+            await eventProducer.ProduceAsync(new TodoItemCreatedNotification() {Item = insertedItem });
+
+            return insertedItem.Id;
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Error getting something fun to say: {Error}", ex);
+            throw;
+        }
     }
 
     public void Dispose() => httpClient?.Dispose();

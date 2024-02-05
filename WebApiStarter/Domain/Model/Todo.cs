@@ -1,4 +1,4 @@
-﻿namespace WebApiStarter.Model;
+﻿namespace WebApiStarter.Domain.Model;
 
 public class Todo
 {

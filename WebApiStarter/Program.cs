@@ -1,38 +1,21 @@
 using CorrelationId;
 using CorrelationId.DependencyInjection;
 using CorrelationId.HttpClient;
-using Elastic.CommonSchema.Serilog;
-using WebApiStarter.Infrastructure;
-using WebApiStarter.Infrastructure.Polly;
-using WebApiStarter.Swagger;
+using KafkaFlow;
+using KafkaFlow.Serializer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using Serilog.Events;
+using WebApiStarter.AppConfig;
+using WebApiStarter.Domain.Events;
+using WebApiStarter.Infrastructure;
+using WebApiStarter.Infrastructure.Polly;
+using WebApiStarter.Services;
+using WebApiStarter.Swagger;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
-Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .Enrich.WithProperty("system.environment", builder.Environment.EnvironmentName)
-    .Enrich.WithProperty("system.service", builder.Environment.ApplicationName)
-    .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    .MinimumLevel.Override("CorrelationId.CorrelationIdMiddleware", LogEventLevel.Information)
-    .MinimumLevel.Override("System", LogEventLevel.Information)
-    .Filter.ByExcluding(logEvent =>
-    {
-        var requestPath = logEvent.Properties.GetValueOrDefault("RequestPath")?.ToString();
-        return requestPath!.Contains("/health/", StringComparison.OrdinalIgnoreCase);
-    })
-
-    .WriteTo.Async(wt => wt.Console(new EcsTextFormatter(new() { IncludeHost = false, IncludeUser = false, IncludeProcess = false })))
-    //.WriteTo.Async(wt => wt.Console(new RenderedCompactJsonFormatter()))
-    //.WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Literate))
-    .CreateLogger();
-
 
 // Add services to the container.
 builder.Services.AddDefaultCorrelationId(options =>
@@ -45,10 +28,53 @@ builder.Services.AddDefaultCorrelationId(options =>
     options.RequestHeader = CorrelationIdAttribute.Name;
 });
 
+
+const string topicName = "sample-topic";
+const string producerName = "say-hello";
+builder.Services.AddKafka(
+    kafka => kafka
+        .UseConsoleLog()
+        .AddCluster(
+            cluster => cluster
+                .WithBrokers(new[] { "localhost:19092" })
+                
+                .AddProducer(
+                    producerName,
+                    producer => producer
+                        .WithProducerConfig(new Confluent.Kafka.ProducerConfig()
+                        {
+                            MessageTimeoutMs = 5000,
+                            RetryBackoffMs = 100 // default
+                        })
+                        .DefaultTopic(topicName)
+                        .AddMiddlewares(m =>
+                            m.AddSerializer<CloudEventSerializer>()
+                            )
+                )
+                .AddConsumer(consumer => consumer
+                    .Topic(topicName)
+                    .WithGroupId("sample-group")
+                    .WithBufferSize(100)
+                    .WithWorkersCount(10)
+                    .AddMiddlewares(middlewares => middlewares
+                        .AddDeserializer<CloudEventDeserializer>()
+                        .AddTypedHandlers(h =>
+                        {
+                            h.AddHandler<CloudEventHandler>();
+                            h.WhenNoHandlerFound(UnhandledEvent.Handle);
+                            
+                        })
+                    )
+                )
+        )
+);
+
+
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
-builder.Host.UseSerilog();
+builder.Host.UseSerilog(AppConfig.SetUpSerilog);
 
+builder.Services.AddScoped<EventProducer>();
 
 // register typed clients with correlation id forwarding and retry policies
 builder.Services.AddHttpClient<ITodoSystemApiClient, TodoSystemApiClient>(
@@ -104,5 +130,9 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 {
     Predicate = _ => false
 });
+
+
+var bus = app.Services.CreateKafkaBus();
+await bus.StartAsync();
 
 app.Run();
