@@ -9,9 +9,9 @@ namespace WebApiStarter.Controllers;
 public class FailingController : ControllerBase
 {
     private readonly ILogger<FailingController> _logger;
-    private readonly FailingHttpClient _failingHttpClient;
+    private readonly IFailingHttpClient _failingHttpClient;
 
-    public FailingController(ILogger<FailingController> logger, FailingHttpClient failingHttpClient)
+    public FailingController(ILogger<FailingController> logger, IFailingHttpClient failingHttpClient)
     {
         _logger = logger;
         _failingHttpClient = failingHttpClient;
@@ -31,5 +31,14 @@ public class FailingController : ControllerBase
             _logger.LogError(e, message: e.Message);
             return Problem(e.Message, nameof(TestRetry));
         }
+    }
+
+    [HttpGet("testException")]
+    public async Task<ActionResult> TestRetryWithUnhandledException()
+    {
+    
+            throw new Exception("bar");
+            return Ok("foo");
+       
     }
 }

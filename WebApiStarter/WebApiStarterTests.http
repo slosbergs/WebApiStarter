@@ -5,11 +5,22 @@ Accept: application/json
 ###
 
 
+GET {{LoggingWithCorrelationIdDemo_HostAddress}}/Failing/testException/
+Accept: application/json
+###
+
+
 GET {{LoggingWithCorrelationIdDemo_HostAddress}}/todo/1/
 Accept: application/json
 X-Correlation-Id: zebra
 ###
 
+
+
+GET {{LoggingWithCorrelationIdDemo_HostAddress}}/health/live
+Accept: application/json
+X-Correlation-Id: zebra
+###
 
 
 
@@ -19,7 +30,7 @@ X-Correlation-Id: zebra
 
 {
   "userId": 1,
-  "title": "asddasda",
+  "title": "ssss",
   "completed": false
 }
 ###

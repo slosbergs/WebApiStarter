@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using WebApiStarter.AppConfig;
+using WebApiStarter.Domain;
 using WebApiStarter.Domain.Events;
 using WebApiStarter.Infrastructure;
 using WebApiStarter.Infrastructure.Polly;
@@ -70,7 +71,12 @@ builder.Services.AddKafka(
 );
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ExceptionFilter>();
+});
+builder.Services.AddProblemDetails();
+
 builder.Services.AddHealthChecks();
 builder.Host.UseSerilog(AppConfig.SetUpSerilog);
 
@@ -100,39 +106,48 @@ builder.Services.AddSwaggerGen(c =>
 
 });
 
+
 var app = builder.Build();
-app.UseCorrelationId();
 
-// Write streamlined request completion events, instead of the more verbose ones from the framework.
-// To use the default framework request logging instead, remove this line and set the "Microsoft"
-// level in appsettings.json to "Information".
-app.UseSerilogRequestLogging();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+   
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseCorrelationId();
+
+
+    // Write streamlined request completion events, instead of the more verbose ones from the framework.
+    // To use the default framework request logging instead, remove this line and set the "Microsoft"
+    // level in appsettings.json to "Information".
+    app.UseSerilogRequestLogging();
+
+    app.UseExceptionHandler("/error");
+
+    // Configure the HTTP request pipeline.
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.MapHealthChecks("/health/ready", new HealthCheckOptions
+    {
+        // ref https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-8.0#separate-readiness-and-liveness-probes
+        Predicate = healthCheck => healthCheck.Tags.Contains("ready")
+    });
+
+    app.MapHealthChecks("/health/live", new HealthCheckOptions
+    {
+        Predicate = _ => false
+    });
+
+
+
+    var bus = app.Services.CreateKafkaBus();
+    await bus.StartAsync();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-app.MapHealthChecks("/health/ready", new HealthCheckOptions
-{
-    // ref https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-8.0#separate-readiness-and-liveness-probes
-    Predicate = healthCheck => healthCheck.Tags.Contains("ready")
-});
-
-app.MapHealthChecks("/health/live", new HealthCheckOptions
-{
-    Predicate = _ => false
-});
-
-
-var bus = app.Services.CreateKafkaBus();
-await bus.StartAsync();
-
-app.Run();

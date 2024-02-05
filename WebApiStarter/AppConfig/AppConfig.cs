@@ -3,6 +3,7 @@ using Serilog.Events;
 using Serilog;
 using Elastic.CommonSchema.Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using Serilog.Formatting.Compact;
 
 namespace WebApiStarter.AppConfig
 {
@@ -17,7 +18,7 @@ namespace WebApiStarter.AppConfig
              .MinimumLevel.Debug()
              .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
              .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-             .MinimumLevel.Override("CorrelationId.CorrelationIdMiddleware", LogEventLevel.Information)
+             .MinimumLevel.Override("CorrelationId.CorrelationIdMiddleware", LogEventLevel.Warning)
              .MinimumLevel.Override("System", LogEventLevel.Information)
              .Filter.ByExcluding(logEvent =>
              {
@@ -26,8 +27,8 @@ namespace WebApiStarter.AppConfig
              })
 
              //.WriteTo.Async(wt => wt.Console(new EcsTextFormatter(new() { IncludeHost = false, IncludeUser = false, IncludeProcess = false })))
-             //.WriteTo.Async(wt => wt.Console(new RenderedCompactJsonFormatter()))
-             .WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Literate))
+             .WriteTo.Async(wt => wt.Console(new RenderedCompactJsonFormatter()))
+             //.WriteTo.Async(wt => wt.Console(theme: AnsiConsoleTheme.Literate))
              ;
         }
 

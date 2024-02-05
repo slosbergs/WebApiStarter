@@ -9,7 +9,7 @@ namespace WebApiStarter.Infrastructure.Polly
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromMilliseconds(retryAttempt * 500));
+                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromMilliseconds(200));
         }
 
 

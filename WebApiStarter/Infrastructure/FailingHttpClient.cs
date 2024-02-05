@@ -22,7 +22,7 @@ public sealed class FailingHttpClient(
     public async Task TestRetry()
     {
         logger.LogDebug("testing polly retry...");
-        var foo = await httpClient.GetAsync("https://httpstat.us/500");
+        var foo = await httpClient.GetAsync("https://httpstat.us/418");
         foo.EnsureSuccessStatusCode();
         logger.LogDebug("finished polly retry...");
     }
